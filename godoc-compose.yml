@@ -1,0 +1,13 @@
+version: '3.1'
+
+services:
+  godoc:
+    build:
+      context: .
+      dockerfile: godoc.Dockerfile
+      args:
+        APP: github.com/pereslava/gomig
+    ports:
+      - 6060:6060
+    volumes:
+      - .:/go/src/github.com/pereslava/gomig

@@ -6,38 +6,38 @@ import (
 	"github.com/pereslava/gomig"
 )
 
-type migMock struct {
+type migration_mock struct {
 	index      int
-	calledUp   int
-	calledDown int
+	calledUp   bool
+	calledDown bool
 	fail       error
 }
 
-func (mig *migMock) Up() (messages []string, err error) {
+func (mig *migration_mock) Up() (messages []string, err error) {
 	if mig.fail != nil {
 		return nil, mig.fail
 	}
-	mig.calledUp++
+	mig.calledUp = true
 	return []string{}, nil
 }
 
-func (mig *migMock) Down() (messages []string, err error) {
+func (mig *migration_mock) Down() (messages []string, err error) {
 	if mig.fail != nil {
 		return nil, errors.New("Some error")
 	}
-	mig.calledDown++
+	mig.calledDown = true
 	return []string{}, nil
 }
 
-func (mig *migMock) reset(index int) {
+func (mig *migration_mock) reset(index int) {
 	mig.index = index
-	mig.calledUp = 0
-	mig.calledDown = 0
+	mig.calledUp = false
+	mig.calledDown = false
 	mig.fail = nil
 }
 
 func resetMigrations(migs []gomig.Migration) {
 	for i, m := range migs {
-		m.(*migMock).reset(i)
+		m.(*migration_mock).reset(i)
 	}
 }

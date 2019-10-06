@@ -1,6 +1,8 @@
 package gomig
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Runner the runner of migrations
 type Runner struct {
@@ -22,27 +24,51 @@ func (r *Runner) Auto() error {
 	if err != nil {
 		return fmt.Errorf("storage GetVersion failed: %v, %w", err, ErrMigrationFailed)
 	}
-	return r.runUp(v, len(r.migs))
+	if v > uint(len(r.migs)) {
+		return fmt.Errorf("Auto failed: %w", ErrNoMigrations)
+	}
+	return r.runUp(v, uint(len(r.migs)))
+}
+
+// Reset runs all migrations down to the clean state and calls to Reset of storage
+func (r *Runner) Reset() error {
+	if r.storage == nil {
+		return ErrNoBackend
+	}
+
+	return nil
 }
 
 // SetVer runs migrations up or down to the ver number
-func (r *Runner) SetVer(ver int) error {
+func (r *Runner) SetVer(ver uint) error {
+	if r.storage == nil {
+		return ErrNoBackend
+	}
+	v, err := r.storage.GetVersion()
+	if err != nil {
+		return fmt.Errorf("storage GetVersion failed: %v, %w", err, ErrMigrationFailed)
+	}
+	switch {
+	case int(ver) > len(r.migs):
+		return fmt.Errorf("SetVer failed: %w", ErrNoMigrations)
+	case v > ver:
+		return r.runDown(v-1, ver)
+	case v < ver:
+		return r.runUp(v, ver)
+	default:
+		return fmt.Errorf("SetVer failed: %w", ErrNoMigrations)
+	}
+}
+
+// ForceVer runs Reset then runs migrations up to the ver number
+func (r *Runner) ForceVer(ver uint) error {
 	if r.storage == nil {
 		return ErrNoBackend
 	}
 	return nil
 }
 
-// ForceVer runs all down migrations from the current version to vertion 0
-// then run migrations up to the ver number
-func (r *Runner) ForceVer(ver int) error {
-	if r.storage == nil {
-		return ErrNoBackend
-	}
-	return nil
-}
-
-func (r *Runner) runUp(from, to int) error {
+func (r *Runner) runUp(from, to uint) error {
 	if r.storage == nil {
 		return ErrNoBackend
 	}
@@ -53,6 +79,20 @@ func (r *Runner) runUp(from, to int) error {
 			return fmt.Errorf("%v, %w", err, ErrMigrationFailed)
 		}
 		r.storage.SaveVersion(i+1, log)
+	}
+	return nil
+}
+
+func (r *Runner) runDown(from, to uint) error {
+	if r.storage == nil {
+		return ErrNoBackend
+	}
+	for i := int(from); i >= int(to); i-- {
+		log, err := r.migs[i].Down()
+		if err != nil {
+			return fmt.Errorf("%v, %w", err, ErrMigrationFailed)
+		}
+		r.storage.SaveVersion(uint(i), log)
 	}
 	return nil
 }

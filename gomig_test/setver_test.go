@@ -99,8 +99,9 @@ func TestSetVer(t *testing.T) {
 				if err := r.SetVer(0); err != nil {
 					t.Error(err)
 				}
-				pattern.Set(0, i-1, downRun, uint(i-1))
+				pattern.Set(i, 0, downRun, 0)
 				t.Log(pattern)
+				t.Error("Test")
 				verifyRunnerResults(t, b, migs, pattern)
 			}
 		})

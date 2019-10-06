@@ -34,8 +34,9 @@ func (p *verifyPattern) Set(from, to int, dir migDir, curVer uint) {
 		}
 	} else {
 		p.seq = make([]uint, from-to)
-		for i := 0; i < len(p.seq); i++ {
-			p.seq[i] = uint(10 - i - 1)
+
+		for i, _ := range p.seq {
+			p.seq[i] = uint(from - 1 - i)
 		}
 		for i := from - 1; i >= to; i-- {
 			p.migs[i] = dir

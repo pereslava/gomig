@@ -35,8 +35,10 @@ func (r *Runner) Reset() error {
 	if r.storage == nil {
 		return ErrNoBackend
 	}
-
-	return nil
+	if err := r.SetVer(0); err != nil {
+		return err
+	}
+	return r.storage.Reset()
 }
 
 // SetVer runs migrations up or down to the ver number
@@ -60,12 +62,15 @@ func (r *Runner) SetVer(ver uint) error {
 	}
 }
 
-// ForceVer runs Reset then runs migrations up to the ver number
+// ForceVer calls Reset then runs migrations up to the ver number
 func (r *Runner) ForceVer(ver uint) error {
 	if r.storage == nil {
 		return ErrNoBackend
 	}
-	return nil
+	if err := r.Reset(); err != nil {
+		return err
+	}
+	return r.SetVer(ver)
 }
 
 func (r *Runner) runUp(from, to uint) error {

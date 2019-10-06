@@ -103,18 +103,21 @@ func TestSetVer(t *testing.T) {
 				verifyRunnerResults(t, b, migs, pattern)
 			}
 		})
-		// t.Run("With fail", func(t *testing.T) {
-		// 	for i := 0; i < 10; i++ {
-		// 		pattern.Set(0, i, upRun, uint(i))
-		// 		b.Reset()
-		// 		resetMigrations(migs)
-		// 		migs[i].(*migration_mock).fail = errors.New("SomeError")
-		// 		if err := r.SetVer(10); !errors.Is(err, gomig.ErrMigrationFailed) {
-		// 			t.Errorf("Want: %v, Have: %v", gomig.ErrMigrationFailed, err)
-		// 		}
-		// 		verifyRunnerResults(t, b, migs, pattern)
-		// 	}
-		// })
+		t.Run("With fail", func(t *testing.T) {
+			for i := 1; i <= 10; i++ {
+				b.Reset()
+				b.currentVer = 10
+				t.Log("Iteration", i)
+				resetMigrations(migs)
+				migs[i-1].(*migration_mock).fail = errors.New("SomeError")
+
+				if err := r.SetVer(0); !errors.Is(err, gomig.ErrMigrationFailed) {
+					t.Errorf("Want: %v, Have: %v", gomig.ErrMigrationFailed, err)
+				}
+				pattern.Set(10, i, downRun, uint(i))
+				verifyRunnerResults(t, b, migs, pattern)
+			}
+		})
 
 	})
 }

@@ -1,8 +1,6 @@
 package gomig_test
 
 import (
-	"errors"
-
 	"github.com/pereslava/gomig"
 )
 
@@ -23,7 +21,7 @@ func (mig *migration_mock) Up() (messages []string, err error) {
 
 func (mig *migration_mock) Down() (messages []string, err error) {
 	if mig.fail != nil {
-		return nil, errors.New("Some error")
+		return nil, mig.fail
 	}
 	mig.calledDown = true
 	return []string{}, nil

@@ -100,8 +100,6 @@ func TestSetVer(t *testing.T) {
 					t.Error(err)
 				}
 				pattern.Set(i, 0, downRun, 0)
-				t.Log(pattern)
-				t.Error("Test")
 				verifyRunnerResults(t, b, migs, pattern)
 			}
 		})

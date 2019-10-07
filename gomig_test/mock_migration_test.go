@@ -11,6 +11,10 @@ type migration_mock struct {
 	fail       error
 }
 
+func (*migration_mock) Name() string {
+	return ""
+}
+
 func (mig *migration_mock) Up() (messages []string, err error) {
 	if mig.fail != nil {
 		return nil, mig.fail

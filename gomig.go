@@ -20,6 +20,7 @@ var (
 type Migration interface {
 	Up() (messages []string, err error)
 	Down() (messages []string, err error)
+	Name() string
 }
 
 // BackendAdapter TODO: Add documentation

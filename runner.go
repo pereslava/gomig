@@ -83,7 +83,7 @@ func (r *Runner) runUp(from, to uint) error {
 		if err != nil {
 			return fmt.Errorf("%v, %w", err, ErrMigrationFailed)
 		}
-		r.storage.SaveVersion(i+1, log)
+		r.storage.SaveVersion(i+1, r.migs[i].Name(), log)
 	}
 	return nil
 }
@@ -97,7 +97,7 @@ func (r *Runner) runDown(from, to uint) error {
 		if err != nil {
 			return fmt.Errorf("%v, %w", err, ErrMigrationFailed)
 		}
-		r.storage.SaveVersion(uint(i), log)
+		r.storage.SaveVersion(uint(i), r.migs[i].Name(), log)
 	}
 	return nil
 }

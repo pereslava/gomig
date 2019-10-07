@@ -26,6 +26,6 @@ type Migration interface {
 // BackendAdapter TODO: Add documentation
 type BackendAdapter interface {
 	GetVersion() (uint, error)
-	SaveVersion(ver uint, messages []string) error
+	SaveVersion(ver uint, name string, messages []string) error
 	Reset() error
 }

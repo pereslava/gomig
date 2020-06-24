@@ -1,6 +1,8 @@
 package gomig_test
 
 import (
+	"context"
+
 	"github.com/pereslava/gomig"
 )
 
@@ -15,7 +17,7 @@ func (*migration_mock) Name() string {
 	return ""
 }
 
-func (mig *migration_mock) Up() (messages []string, err error) {
+func (mig *migration_mock) Up(ctx context.Context) (messages []string, err error) {
 	if mig.fail != nil {
 		return nil, mig.fail
 	}
@@ -23,7 +25,7 @@ func (mig *migration_mock) Up() (messages []string, err error) {
 	return []string{}, nil
 }
 
-func (mig *migration_mock) Down() (messages []string, err error) {
+func (mig *migration_mock) Down(ctx context.Context) (messages []string, err error) {
 	if mig.fail != nil {
 		return nil, mig.fail
 	}

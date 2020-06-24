@@ -2,6 +2,7 @@
 package gomig
 
 import (
+	"context"
 	"errors"
 )
 
@@ -18,14 +19,14 @@ var (
 
 // Migration TODO: Add documentation
 type Migration interface {
-	Up() (messages []string, err error)
-	Down() (messages []string, err error)
+	Up(ctx context.Context) (messages []string, err error)
+	Down(ctx context.Context) (messages []string, err error)
 	Name() string
 }
 
 // BackendAdapter TODO: Add documentation
 type BackendAdapter interface {
-	GetVersion() (uint, error)
-	SaveVersion(ver uint, name string, messages []string) error
-	Reset() error
+	GetVersion(ctx context.Context) (uint, error)
+	SaveVersion(ctx context.Context, ver uint, name string, messages []string) error
+	Reset(ctx context.Context) error
 }

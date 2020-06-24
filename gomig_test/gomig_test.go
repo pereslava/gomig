@@ -1,6 +1,7 @@
 package gomig_test
 
 import (
+	"context"
 	"errors"
 	"reflect"
 	"testing"
@@ -26,7 +27,7 @@ func (p *verifyPattern) Set(from, to int, dir migDir, curVer uint) {
 	p.migs = make([]migDir, 10)
 	if from <= to {
 		p.seq = make([]uint, to-from)
-		for i, _ := range p.seq {
+		for i := range p.seq {
 			p.seq[i] = uint(i + from + 1)
 		}
 		for i := from; i < to; i++ {
@@ -35,7 +36,7 @@ func (p *verifyPattern) Set(from, to int, dir migDir, curVer uint) {
 	} else {
 		p.seq = make([]uint, from-to)
 
-		for i, _ := range p.seq {
+		for i := range p.seq {
 			p.seq[i] = uint(from - 1 - i)
 		}
 		for i := from - 1; i >= to; i-- {
@@ -45,13 +46,13 @@ func (p *verifyPattern) Set(from, to int, dir migDir, curVer uint) {
 	p.curVer = curVer
 }
 
-func verifyRunnerResults(t *testing.T, b *backend_mock, migs []gomig.Migration, pattern *verifyPattern) {
+func verifyRunnerResults(ctx context.Context, t *testing.T, b *backend_mock, migs []gomig.Migration, pattern *verifyPattern) {
 	if !(len(pattern.seq) == 0 && len(b.seq) == 0) {
 		if !reflect.DeepEqual(pattern.seq, b.seq) {
 			t.Errorf("Versions sequence: Want: %v, Have: %v", pattern.seq, b.seq)
 		}
 	}
-	if v, _ := b.GetVersion(); v != pattern.curVer {
+	if v, _ := b.GetVersion(ctx); v != pattern.curVer {
 		t.Errorf("Check Current Version failed, Want: %d, Have: %d", pattern.curVer, v)
 	}
 
@@ -86,7 +87,7 @@ func verifyRunnerResults(t *testing.T, b *backend_mock, migs []gomig.Migration, 
 func setup() (gomig.BackendAdapter, []gomig.Migration, gomig.Runner) {
 	backend := &backend_mock{}
 	migs := make([]gomig.Migration, 10)
-	for i, _ := range migs {
+	for i := range migs {
 		migs[i] = &migration_mock{index: i}
 	}
 	r := gomig.NewRunner(migs, backend)
@@ -94,15 +95,16 @@ func setup() (gomig.BackendAdapter, []gomig.Migration, gomig.Runner) {
 }
 
 func TestNoBackend(t *testing.T) {
+	ctx := context.Background()
 	r := gomig.NewRunner(nil, nil)
 	t.Run("Reset fails if no backend set", func(t *testing.T) {
-		if err := r.Reset(); !errors.Is(err, gomig.ErrNoBackend) {
+		if err := r.Reset(ctx); !errors.Is(err, gomig.ErrNoBackend) {
 			t.Errorf("Want: %v, Have: %v", gomig.ErrNoBackend, err)
 		}
 	})
 
 	t.Run("ForceVer fails if no backend set", func(t *testing.T) {
-		if err := r.ForceVer(0); !errors.Is(err, gomig.ErrNoBackend) {
+		if err := r.ForceVer(ctx, 0); !errors.Is(err, gomig.ErrNoBackend) {
 			t.Errorf("Want: %v, Have: %v", gomig.ErrNoBackend, err)
 		}
 	})

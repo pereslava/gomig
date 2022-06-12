@@ -13,7 +13,7 @@ func TestAuto(t *testing.T) {
 	t.Run("Fails if no backend set", func(t *testing.T) {
 		r := gomig.NewRunner(nil, nil)
 
-		if err := r.Auto(ctx); !errors.Is(err, gomig.ErrNoBackend) {
+		if err := r.Up(ctx); !errors.Is(err, gomig.ErrNoBackend) {
 			t.Errorf("Want: %v, Have: %v", gomig.ErrNoBackend, err)
 		}
 	})
@@ -32,7 +32,7 @@ func TestAuto(t *testing.T) {
 			b.Reset(ctx)
 			b.currentVer = uint(i)
 			resetMigrations(migs)
-			if err := r.Auto(ctx); err != nil {
+			if err := r.Up(ctx); err != nil {
 				t.Errorf("TestAuto failed: %v", err)
 			}
 			pattern.Set(i, 10, upRun, 10)
@@ -50,7 +50,7 @@ func TestAuto(t *testing.T) {
 			b.Reset(ctx)
 			resetMigrations(migs)
 			migs[i].(*migration_mock).fail = errors.New("SomeError")
-			if err := r.Auto(ctx); !errors.Is(err, gomig.ErrMigrationFailed) {
+			if err := r.Up(ctx); !errors.Is(err, gomig.ErrMigrationFailed) {
 				t.Errorf("Want: %v, Have: %v", gomig.ErrMigrationFailed, err)
 			}
 			verifyRunnerResults(ctx, t, b, migs, pattern)
@@ -62,7 +62,7 @@ func TestAuto(t *testing.T) {
 
 	t.Run("Silent exit if curVer == len of migrations array", func(t *testing.T) {
 		b.currentVer = 10
-		if err := r.Auto(ctx); err != nil {
+		if err := r.Up(ctx); err != nil {
 			t.Errorf("TestAuto failed: %v", err)
 		}
 		verifyRunnerResults(ctx, t, b, migs, &verifyPattern{
@@ -77,7 +77,7 @@ func TestAuto(t *testing.T) {
 
 	t.Run("Returns ErrNoMigrations if len of migrations array less from current version", func(t *testing.T) {
 		b.currentVer = 11
-		if err := r.Auto(ctx); !errors.Is(err, gomig.ErrNoMigrations) {
+		if err := r.Up(ctx); !errors.Is(err, gomig.ErrNoMigrations) {
 			t.Errorf("Want: %v, Have: %v", gomig.ErrNoMigrations, err)
 		}
 		verifyRunnerResults(ctx, t, b, migs, &verifyPattern{

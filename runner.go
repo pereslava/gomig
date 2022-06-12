@@ -16,8 +16,8 @@ func NewRunner(migs []Migration, storage BackendAdapter) *Runner {
 	return &Runner{migs, storage}
 }
 
-// Auto runs the migrations from the current version up to the latest
-func (r *Runner) Auto(ctx context.Context) error {
+// Up runs the migrations from the current version up to the latest
+func (r *Runner) Up(ctx context.Context) error {
 	if r.storage == nil {
 		return ErrNoBackend
 	}
@@ -29,6 +29,23 @@ func (r *Runner) Auto(ctx context.Context) error {
 		return fmt.Errorf("Auto failed: %w", ErrNoMigrations)
 	}
 	return r.runUp(ctx, v, uint(len(r.migs)))
+}
+
+func (r *Runner) Down(ctx context.Context) error {
+	ver, err := r.storage.GetVersion(ctx)
+	if err != nil {
+		return err
+	}
+	if ver == 0 {
+		return nil
+	}
+	if err := r.runDown(ctx, ver, ver-1); err != nil {
+		return err
+	}
+	if ver-1 == 0 {
+		return r.storage.Reset(ctx)
+	}
+	return nil
 }
 
 // Reset runs all migrations down to the clean state and calls to Reset of storage

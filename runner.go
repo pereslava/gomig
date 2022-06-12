@@ -84,7 +84,9 @@ func (r *Runner) runUp(ctx context.Context, from, to uint) error {
 		if err != nil {
 			return fmt.Errorf("%v, %w", err, ErrMigrationFailed)
 		}
-		r.storage.SaveVersion(ctx, i+1, r.migs[i].Name(), log)
+		if err := r.storage.SaveVersion(ctx, i+1, r.migs[i].Name(), log); err != nil {
+			return fmt.Errorf("%v, %w", err, ErrMigrationFailed)
+		}
 	}
 	return nil
 }
@@ -98,7 +100,9 @@ func (r *Runner) runDown(ctx context.Context, from, to uint) error {
 		if err != nil {
 			return fmt.Errorf("%v, %w", err, ErrMigrationFailed)
 		}
-		r.storage.SaveVersion(ctx, uint(i), r.migs[i].Name(), log)
+		if err := r.storage.SaveVersion(ctx, uint(i), r.migs[i].Name(), log); err != nil {
+			return fmt.Errorf("%v, %w", err, ErrMigrationFailed)
+		}
 	}
 	return nil
 }

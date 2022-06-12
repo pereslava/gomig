@@ -39,13 +39,10 @@ func (r *Runner) Down(ctx context.Context) error {
 	if ver == 0 {
 		return nil
 	}
-	if err := r.runDown(ctx, ver, ver-1); err != nil {
-		return err
+	if ver == 1 {
+		return r.Reset(ctx)
 	}
-	if ver-1 == 0 {
-		return r.storage.Reset(ctx)
-	}
-	return nil
+	return r.SetVer(ctx, ver-1)
 }
 
 // Reset runs all migrations down to the clean state and calls to Reset of storage
